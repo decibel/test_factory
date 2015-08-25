@@ -32,6 +32,14 @@ CREATE TYPE tf.test_set AS (
 	, insert_sql	text
 );
 
+CREATE TABLE _tf.test_factory(
+	factory_id		SERIAL		NOT NULL PRIMARY KEY
+	, table_oid		oid			NOT NULL -- Can't do a FK to a catalog
+	, set_name		text		NOT NULL
+	, insert_sql	text		NOT NULL
+	, UNIQUE( table_oid, set_name )
+);
+
 
 CREATE OR REPLACE FUNCTION _tf.data_table_name(
   table_name text
@@ -95,14 +103,6 @@ END
 $body$;
 
 
-
-CREATE TABLE _tf.test_factory(
-	factory_id		SERIAL		NOT NULL PRIMARY KEY
-	, table_oid		oid			NOT NULL -- Can't do a FK to a catalog
-	, set_name		text		NOT NULL
-	, insert_sql	text		NOT NULL
-	, UNIQUE( table_oid, set_name )
-);
 
 CREATE OR REPLACE FUNCTION tf.register(
   table_name text
