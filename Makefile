@@ -39,8 +39,23 @@ include $(PGXS)
 # Don't have installcheck bomb on error
 .IGNORE: installcheck
 
+#
+# pgtap
+#
+.PHONY: pgtap
+pgtap: $(DESTDIR)$(datadir)/extension/pgtap.control
+
+$(DESTDIR)$(datadir)/extension/pgtap.control:
+	pgxn install pgtap
+
+#
+# testdeps
+#
+.PHONY: testdeps
+testdeps: pgtap
+
 .PHONY: test
-test: clean install installcheck
+test: clean testdeps install installcheck
 	@if [ -r regression.diffs ]; then cat regression.diffs; fi
 
 .PHONY: results
