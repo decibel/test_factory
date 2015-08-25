@@ -3,5 +3,5 @@
 
 BEGIN;
 \i test/helpers/deps.sql
-\i sql/test_format.sql
+\i sql/test_factory.sql
 ROLLBACK;
