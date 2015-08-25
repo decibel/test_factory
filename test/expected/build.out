@@ -1,1 +1,5 @@
-
+\set ECHO none
+psql:sql/test_factory.sql:79: NOTICE:  00000: type reference _tf.test_factory.set_name%TYPE converted to text
+LOCATION:  LookupTypeName, parse_type.c:143
+psql:sql/test_factory.sql:103: NOTICE:  00000: type reference _tf.test_factory.set_name%TYPE converted to text
+LOCATION:  LookupTypeName, parse_type.c:143
