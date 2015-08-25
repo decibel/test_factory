@@ -1,5 +1,5 @@
 {
-    "name": "test_framework",
+    "name": "test_factory",
     "abstract": "Framework for managing test data",
     "description": "Provides functions for registering commands to create test data and obtaining data during testing",
     "version": "0.1.1",
@@ -8,8 +8,8 @@
     "provides": {
         "test_factory": {
             "abstract": "Framework for managing test data",
-            "file": "sql/test_framework.sql",
-            "docfile": "doc/test_framework.md",
+            "file": "sql/test_factory.sql",
+            "docfile": "doc/test_factory.md",
             "version": "0.1.1"
         }
     },
