@@ -1,0 +1,22 @@
+# Editor stuff
+.*.swp
+
+# Build output
+*.so
+*.o
+.deps/
+
+# dist output
+/test_factory-*.zip
+
+/sql/test_factory--*
+!/sql/test_factory--*--*.sql
+
+# Test artifacts
+results/
+regression.diffs
+regression.out
+
+# Misc crap
+.DS_Store
+tmp/

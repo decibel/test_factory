@@ -1,0 +1,43 @@
+{
+    "name": "test_framework",
+    "abstract": "Framework for managing test data",
+    "description": "Provides functions for registering commands to create test data and obtaining data during testing",
+    "version": "0.1.1",
+    "maintainer": "Jim Nasby <Jim.Nasby@BlueTreble.com>",
+    "license": {"BSD 2 Clause": "http://opensource.org/licenses/bsd-license.php"},
+    "provides": {
+        "test_factory": {
+            "abstract": "Framework for managing test data",
+            "file": "sql/test_framework.sql",
+            "docfile": "doc/test_framework.md",
+            "version": "0.1.1"
+        }
+    },
+
+
+    "release_status": "unstable",
+
+    "generated_by": "Jim Nasby <Jim.Nasby@BlueTreble.com>",
+
+    "tags": [ "testing", "unit test", "tests", "test data", "test factory" ],
+    
+    "resources": {
+        "homepage": "http://github.com/BlueTreble/test_factory/",
+        "bugtracker": {
+            "web": "http://github.com/BlueTreble/test_factory/issues"
+        },
+        "repository": {
+            "url": "git://github.com/BlueTreble/test_factory.git",
+            "web": "http://github.com/BlueTreble/test_factory/",
+            "type": "git"
+        }
+    },
+
+    "meta-spec": {
+        "version": "1.0.0",
+        "url": "http://pgxn.org/meta/spec.txt"
+    },
+
+    "X_vi": "vi: expandtab ts=4 sw=4"
+    
+}
