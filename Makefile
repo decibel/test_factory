@@ -15,7 +15,7 @@ REGRESS_OPTS = --inputdir=test --load-language=plpgsql
 #MODULES      = $(patsubst %.c,%,$(wildcard src/*.c))
 PG_CONFIG    = pg_config
 
-EXTRA_CLEAN  = $(wildcard $(EXTENSION)-*.zip)
+EXTRA_CLEAN  = $(wildcard $(EXTENSION)-*.zip) $(wildcard sql/$(EXTENSION)--$(EXTVERSION).sql)
 VERSION 	 = $(shell $(PG_CONFIG) --version | awk '{print $$2}' | sed -e 's/devel$$//')
 MAJORVER 	 = $(shell echo $(VERSION) | cut -d . -f1,2 | tr -d .)
 
@@ -26,7 +26,7 @@ GE91		 = $(call test, $(MAJORVER), -ge, 91)
 ifeq ($(GE91),yes)
 all: sql/$(EXTENSION)--$(EXTVERSION).sql
 
-sql/$(EXTENSION)--$(EXTVERSION).sql: sql/$(EXTENSION).sql
+sql/$(EXTENSION)--$(EXTVERSION).sql: sql/$(EXTENSION).sql META.json
 	cp $< $@
 
 DATA = $(wildcard sql/*--*.sql)
