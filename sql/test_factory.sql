@@ -17,15 +17,19 @@ CREATE SCHEMA _tf AUTHORIZATION test_factory__owner;
 -- Sucks that we have to do this. Need community to separate visibility and usage.
 GRANT USAGE ON SCHEMA _tf TO public;
 
+CREATE SCHEMA _test_factory_test_data AUTHORIZATION test_factory__owner;
+
 -- Need to be SU
 CREATE OR REPLACE FUNCTION _tf.schema__getsert(
 ) RETURNS name SECURITY DEFINER SET search_path = pg_catalog LANGUAGE plpgsql AS $body$
 BEGIN
+  /*
   IF NOT EXISTS( SELECT 1 FROM pg_namespace WHERE nspname = '_test_data' ) THEN
     CREATE SCHEMA _test_data AUTHORIZATION test_factory__owner;
   END IF;
+  */
 
-  RETURN '_test_data';
+  RETURN '_test_factory_test_data';
 END
 $body$;
 
