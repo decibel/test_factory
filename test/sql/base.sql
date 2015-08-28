@@ -89,9 +89,6 @@ SELECT is_empty(
   , 'invoice table is empty'
 );
 
-SET ROLE = DEFAULT;
-SET log_min_messages = debug5;
-SET ROLE = test_role;
 SELECT results_eq(
   $$SELECT * FROM tf.get( NULL::invoice, 'base' )$$
   , $$VALUES( 1, 1, current_date, current_date + 30 )$$
