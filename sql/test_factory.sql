@@ -19,7 +19,7 @@ GRANT USAGE ON SCHEMA _tf TO public;
 
 -- Need to be SU
 CREATE OR REPLACE FUNCTION _tf.schema__getsert(
-) RETURNS name SECURITY DEFINER LANGUAGE plpgsql AS $body$
+) RETURNS name SECURITY DEFINER SET search_path = pg_catalog LANGUAGE plpgsql AS $body$
 BEGIN
   IF NOT EXISTS( SELECT 1 FROM pg_namespace WHERE nspname = '_test_data' ) THEN
     CREATE SCHEMA _test_data AUTHORIZATION test_factory__owner;
@@ -66,7 +66,7 @@ BEGIN
       ) )
       , c.relname
     INTO v_factory_id_text, v_table_name
-    FROM _tf.test_factory__get( table_name, set_name ) f
+    FROM tf.test_factory__get( table_name, set_name ) f
       JOIN pg_class c ON c.oid = f.table_oid
       JOIN pg_namespace n ON n.oid = c.relnamespace
   ;
@@ -88,16 +88,14 @@ $body$;
 CREATE OR REPLACE FUNCTION _tf.test_factory__get(
   table_name text
   , set_name _tf._test_factory.set_name%TYPE
-) RETURNS _tf._test_factory SECURITY DEFINER LANGUAGE plpgsql AS $body$
-<<f>>
+  , table_oid oid -- Must be passed in because of forced search_path
+) RETURNS _tf._test_factory SECURITY DEFINER SET search_path = pg_catalog LANGUAGE plpgsql AS $body$
 DECLARE
-  c_table_oid CONSTANT regclass := table_name;
-
   v_test_factory _tf._test_factory;
 BEGIN
   SELECT * INTO STRICT v_test_factory
     FROM _tf._test_factory tf
-    WHERE table_oid = c_table_oid
+    WHERE tf.table_oid = test_factory__get.table_oid
       AND tf.set_name = test_factory__get.set_name
   ;
 
@@ -107,13 +105,19 @@ EXCEPTION
     RAISE 'No factory found for table "%", set name "%"', table_name, set_name;
 END
 $body$;
+CREATE OR REPLACE FUNCTION tf.test_factory__get(
+  table_name text
+  , set_name _tf._test_factory.set_name%TYPE
+) RETURNS _tf._test_factory LANGUAGE sql AS $body$
+SELECT * FROM _tf.test_factory__get(table_name, set_name, table_name::regclass)
+$body$;
 
 
 CREATE OR REPLACE FUNCTION _tf.test_factory__set(
   table_oid regclass
   , set_name text
   , insert_sql text
-) RETURNS void SECURITY DEFINER LANGUAGE plpgsql AS $body$
+) RETURNS void SECURITY DEFINER SET search_path = pg_catalog LANGUAGE plpgsql AS $body$
 BEGIN
   UPDATE _tf._test_factory
     SET insert_sql = test_factory__set.insert_sql
@@ -154,7 +158,7 @@ $body$;
 
 CREATE OR REPLACE FUNCTION _tf.table_create(
   table_name text
-) RETURNS void SECURITY DEFINER LANGUAGE plpgsql AS $body$
+) RETURNS void SECURITY DEFINER SET search_path = pg_catalog LANGUAGE plpgsql AS $body$
 DECLARE
   c_td_schema CONSTANT name := _tf.schema__getsert();
   sql text;
@@ -200,7 +204,7 @@ $$
             , factory.insert_sql
           )
         INTO create_sql
-        FROM _tf.test_factory__get( c_table_name, set_name ) factory
+        FROM tf.test_factory__get( c_table_name, set_name ) factory
       ;
       RAISE DEBUG 'sql = %', create_sql;
       EXECUTE create_sql;
@@ -214,7 +218,7 @@ $body$;
 CREATE OR REPLACE FUNCTION _tf.get(
   r anyelement
   , set_name text
-) RETURNS SETOF anyelement SECURITY DEFINER LANGUAGE plpgsql AS $body$
+) RETURNS SETOF anyelement SECURITY DEFINER SET search_path = pg_catalog LANGUAGE plpgsql AS $body$
 DECLARE
   c_table_name CONSTANT text := pg_typeof(r);
   -- This sanity-checks table_name for us

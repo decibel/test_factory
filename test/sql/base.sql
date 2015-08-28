@@ -18,6 +18,18 @@ SELECT is(
   , 'Ensure role is put back after install'
 );
 
+SELECT cmp_ok(
+      proconfig
+      , '@>'
+      , '{search_path=pg_catalog}'
+      , 'Security definer function ' || p.oid::regproc || ' has search_path=pg_catalog'
+    )
+  FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = pronamespace
+  WHERE n.nspname IN ( 'tf', '_tf' )
+    AND p.prosecdef
+;
+
 SELECT lives_ok(
 $lives_ok$SELECT tf.register(
   'customer'
