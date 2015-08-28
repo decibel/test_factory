@@ -63,8 +63,9 @@ results: test
 	rsync -rlpgovP results/ test/expected
 
 rmtag:
+	git pull # Update our remotes
 	@test -z "$$(git branch --list $(EXTVERSION))" || git branch -d $(EXTVERSION)
-#	@test -z "$$(git branch --list -r */$(EXTVERSION))" || git branch -dr `git branch --list -r */$(EXTVERSION)`
+	@test -z "$$(git branch --list -r origin/$(EXTVERSION))" || git push --delete origin $(EXTVERSION)
 
 tag:
 	@test -z "$$(git status --porcelain)" || (echo 'Untracked changes!'; echo; git status; exit 1)
