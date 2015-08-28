@@ -63,7 +63,7 @@ results: test
 	rsync -rlpgovP results/ test/expected
 
 rmtag:
-	git pull # Update our remotes
+	git fetch origin # Update our remotes
 	@test -z "$$(git branch --list $(EXTVERSION))" || git branch -d $(EXTVERSION)
 	@test -z "$$(git branch --list -r origin/$(EXTVERSION))" || git push --delete origin $(EXTVERSION)
 
