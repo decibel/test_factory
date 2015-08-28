@@ -43,6 +43,7 @@ CREATE TABLE _tf._test_factory(
 	, UNIQUE( table_oid, set_name )
 );
 SELECT pg_catalog.pg_extension_config_dump('_tf._test_factory', '');
+SELECT pg_catalog.pg_extension_config_dump('_tf._test_factory_factory_id_seq', '');
 
 
 CREATE OR REPLACE FUNCTION _tf.data_table_name(
