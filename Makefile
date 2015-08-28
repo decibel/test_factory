@@ -64,7 +64,7 @@ results: test
 
 rmtag:
 	@test -z "$$(git branch --list $(EXTVERSION))" || git branch -d $(EXTVERSION)
-	@test -z "$$(git branch --list -r */$(EXTVERSION))" || git branch -dr `git branch --list */$(EXTVERSION)`
+#	@test -z "$$(git branch --list -r */$(EXTVERSION))" || git branch -dr `git branch --list -r */$(EXTVERSION)`
 
 tag:
 	@test -z "$$(git status --porcelain)" || (echo 'Untracked changes!'; echo; git status; exit 1)
