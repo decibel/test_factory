@@ -12,6 +12,12 @@ SET search_path = test, tap;
 \i test/helpers/create.sql
 
 SELECT no_plan();
+SELECT is(
+  (SELECT * FROM post_install_role)
+  , (SELECT * FROM pre_install_role)
+  , 'Ensure role is put back after install'
+);
+
 SELECT lives_ok(
 $lives_ok$SELECT tf.register(
   'customer'

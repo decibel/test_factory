@@ -1,3 +1,5 @@
+CREATE TEMP TABLE original_role ON COMMIT DROP AS SELECT current_user AS original_role;
+GRANT SELECT ON pg_temp.original_role TO public;
 DO $body$
 BEGIN
 	CREATE ROLE test_factory__owner;
@@ -6,7 +8,6 @@ EXCEPTION
         NULL;
 END
 $body$;
-SELECT * FROM pg_roles;
 
 CREATE SCHEMA tf AUTHORIZATION test_factory__owner;
 COMMENT ON SCHEMA tf IS $$Test factory. Tools for maintaining test data.$$;
@@ -234,5 +235,13 @@ END
 $body$;
 
 --select (tf.get('moo','moo')::moo).*;
+DO $body$
+DECLARE
+  c_sql CONSTANT text :=  'SET ROLE ' || (SELECT original_role FROM pg_temp.original_role);
+BEGIN
+  --RAISE WARNING 'c_sql = %', c_sql;
+  EXECUTE c_sql;
+END
+$body$;
 
 -- vi: expandtab ts=2 sw=2
