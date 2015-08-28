@@ -158,13 +158,15 @@ DECLARE
   sql text;
 BEGIN
   sql := format(
-    $$CREATE TABLE %I.%I AS SELECT * FROM pg_temp.%2$I$$
+    $sql$
+CREATE TABLE %I.%I AS SELECT * FROM pg_temp.%2$I;
+DROP TABLE pg_temp.%2$I;
+    $sql$
     , c_td_schema
-    , c_data_table_name
+    , table_name
   );
   RAISE DEBUG 'sql = %', sql;
   EXECUTE sql;
-  DROP TABLE _test_factory_temp_data;
 END
 $body$;
 

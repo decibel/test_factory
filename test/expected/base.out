@@ -1,18 +1,16 @@
 \set ECHO none
-ok 1 - Create customer table
-ok 2 - Register test customers
-ok 3 - Create function customer__add
-ok 4 - Create invoice table
-ok 5 - Register test invoices
-ok 6 - customer table is empty
-ok 7 - invoice table is empty
-ok 8 - invoice factory output
-ok 9 - invoice table content
-ok 10 - customer table content
-ok 11 - invoice factory second call
-ok 12 - invoice table content stayed constant
-ok 13 - customer table content stayed constant
-ok 14 - Test function factory
-ok 15 - customer table has new row
-ok 16 - truncate invoice
-ok 17 - invoice factory get remains the same after truncate
+ok 1 - Register test customers
+ok 2 - Create function customer__add
+ok 3 - Register test invoices
+ok 4 - customer table is empty
+ok 5 - invoice table is empty
+ok 6 - invoice factory output
+ok 7 - invoice table content
+ok 8 - customer table content
+ok 9 - invoice factory second call
+ok 10 - invoice table content stayed constant
+ok 11 - customer table content stayed constant
+ok 12 - Test function factory
+ok 13 - customer table has new row
+ok 14 - truncate invoice
+ok 15 - invoice factory get remains the same after truncate
