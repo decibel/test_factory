@@ -9,16 +9,9 @@ GRANT test_role TO test_factory__owner;
 CREATE SCHEMA test AUTHORIZATION test_role;
 SET ROLE = test_role;
 SET search_path = test, tap;
+\i test/helpers/create.sql
 
 SELECT no_plan();
-SELECT lives_ok(
-$$CREATE TABLE customer(
-  customer_id   serial  PRIMARY KEY
-  , first_name  text    NOT NULL
-  , last_name   text    NOT NULL
-);$$
-  , 'Create customer table'
-);
 SELECT lives_ok(
 $lives_ok$SELECT tf.register(
   'customer'
@@ -52,16 +45,6 @@ $body$;$lives_ok$
 );
 
 SELECT lives_ok(
-$$CREATE TABLE invoice(
-  invoice_id      serial  PRIMARY KEY
-  , customer_id   int     NOT NULL REFERENCES customer
-  , invoice_date  date  NOT NULL
-  , due_date      date
-);$$
-  , 'Create invoice table'
-);
-
-SELECT lives_ok(
 $lives_ok$SELECT tf.register(
   'invoice'
   , array[
@@ -88,6 +71,9 @@ SELECT is_empty(
   , 'invoice table is empty'
 );
 
+SET ROLE = DEFAULT;
+SET log_min_messages = debug5;
+SET ROLE = test_role;
 SELECT results_eq(
   $$SELECT * FROM tf.get( NULL::invoice, 'base' )$$
   , $$VALUES( 1, 1, current_date, current_date + 30 )$$

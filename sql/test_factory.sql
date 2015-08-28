@@ -6,12 +6,15 @@ EXCEPTION
         NULL;
 END
 $body$;
+SELECT * FROM pg_roles;
 
 CREATE SCHEMA tf AUTHORIZATION test_factory__owner;
 COMMENT ON SCHEMA tf IS $$Test factory. Tools for maintaining test data.$$;
 GRANT USAGE ON SCHEMA tf TO public;
 
 CREATE SCHEMA _tf AUTHORIZATION test_factory__owner;
+-- Sucks that we have to do this. Need community to separate visibility and usage.
+GRANT USAGE ON SCHEMA _tf TO public;
 
 -- Need to be SU
 CREATE OR REPLACE FUNCTION _tf.schema__getsert(
@@ -25,25 +28,26 @@ BEGIN
 END
 $body$;
 
-SET ROLE test_factory__owner;
+SET LOCAL ROLE test_factory__owner;
 
 CREATE TYPE tf.test_set AS (
 	set_name		text
 	, insert_sql	text
 );
 
-CREATE TABLE _tf.test_factory(
+CREATE TABLE _tf._test_factory(
 	factory_id		SERIAL		NOT NULL PRIMARY KEY
-	, table_oid		oid			NOT NULL -- Can't do a FK to a catalog
-	, set_name		text		NOT NULL
-	, insert_sql	text		NOT NULL
+	, table_oid		regclass	NOT NULL -- Can't do a FK to a catalog
+	, set_name		text	  	NOT NULL
+	, insert_sql	text	  	NOT NULL
 	, UNIQUE( table_oid, set_name )
 );
+SELECT pg_catalog.pg_extension_config_dump('_tf._test_factory', '');
 
 
 CREATE OR REPLACE FUNCTION _tf.data_table_name(
   table_name text
-  , set_name _tf.test_factory.set_name%TYPE
+  , set_name _tf._test_factory.set_name%TYPE
 ) RETURNS name LANGUAGE plpgsql AS $body$
 DECLARE
   v_factory_id_text text;
@@ -81,16 +85,16 @@ $body$;
 
 CREATE OR REPLACE FUNCTION _tf.test_factory__get(
   table_name text
-  , set_name _tf.test_factory.set_name%TYPE
-) RETURNS _tf.test_factory LANGUAGE plpgsql AS $body$
+  , set_name _tf._test_factory.set_name%TYPE
+) RETURNS _tf._test_factory SECURITY DEFINER LANGUAGE plpgsql AS $body$
 <<f>>
 DECLARE
   c_table_oid CONSTANT regclass := table_name;
 
-  v_test_factory _tf.test_factory;
+  v_test_factory _tf._test_factory;
 BEGIN
   SELECT * INTO STRICT v_test_factory
-    FROM _tf.test_factory tf
+    FROM _tf._test_factory tf
     WHERE table_oid = c_table_oid
       AND tf.set_name = test_factory__get.set_name
   ;
@@ -103,31 +107,26 @@ END
 $body$;
 
 
-
-CREATE OR REPLACE FUNCTION tf.register(
-  table_name text
-  , test_sets tf.test_set[]
+CREATE OR REPLACE FUNCTION _tf.test_factory__set(
+  table_oid regclass
+  , set_name text
+  , insert_sql text
 ) RETURNS void SECURITY DEFINER LANGUAGE plpgsql AS $body$
-DECLARE
-  c_table_oid CONSTANT regclass := table_name;
-  v_set tf.test_set;
 BEGIN
-  FOREACH v_set IN ARRAY test_sets LOOP
-    UPDATE _tf.test_factory
-      SET insert_sql = v_set.insert_sql
-      WHERE table_oid = c_table_oid
-        AND set_name = v_set.set_name
+  UPDATE _tf._test_factory
+    SET insert_sql = test_factory__set.insert_sql
+    WHERE _test_factory.table_oid = test_factory__set.table_oid
+      AND _test_factory.set_name = test_factory__set.set_name
+  ;
+  /*
+   * There shouldn't be concurrency conflicts here. If there are I think it's
+   * better to error than UPSERT.
+   */
+  IF NOT FOUND THEN
+    INSERT INTO _tf._test_factory( table_oid, set_name, insert_sql )
+      VALUES( table_oid, set_name, insert_sql )
     ;
-    /*
-     * There shouldn't be concurrency conflicts here. If there are I think it's
-     * better to error than UPSERT.
-     */
-    IF NOT FOUND THEN
-      INSERT INTO _tf.test_factory( table_oid, set_name, insert_sql )
-        VALUES( c_table_oid, v_set.set_name, v_set.insert_sql )
-      ;
-    END IF;
-  END LOOP;
+  END IF;
 END
 $body$;
 
@@ -135,33 +134,80 @@ $body$;
 CREATE OR REPLACE FUNCTION tf.register(
   table_name text
   , test_sets tf.test_set[]
-) RETURNS void SECURITY DEFINER LANGUAGE plpgsql AS $body$
+) RETURNS void LANGUAGE plpgsql AS $body$
 DECLARE
   c_table_oid CONSTANT regclass := table_name;
   v_set tf.test_set;
 BEGIN
   FOREACH v_set IN ARRAY test_sets LOOP
-    UPDATE _tf.test_factory
-      SET insert_sql = v_set.insert_sql
-      WHERE table_oid = c_table_oid
-        AND set_name = v_set.set_name
-    ;
-    /*
-     * There shouldn't be concurrency conflicts here. If there are I think it's
-     * better to error than UPSERT.
-     */
-    IF NOT FOUND THEN
-      INSERT INTO _tf.test_factory( table_oid, set_name, insert_sql )
-        VALUES( c_table_oid, v_set.set_name, v_set.insert_sql )
-      ;
-    END IF;
+    PERFORM _tf.test_factory__set(
+      c_table_oid
+      , v_set.set_name
+      , v_set.insert_sql
+    );
   END LOOP;
 END
 $body$;
 
 
+CREATE OR REPLACE FUNCTION _tf.table_create(
+  table_name text
+) RETURNS void SECURITY DEFINER LANGUAGE plpgsql AS $body$
+DECLARE
+  c_td_schema CONSTANT name := _tf.schema__getsert();
+  sql text;
+BEGIN
+  sql := format(
+    $$CREATE TABLE %I.%I AS SELECT * FROM pg_temp.%2$I$$
+    , c_td_schema
+    , c_data_table_name
+  );
+  RAISE DEBUG 'sql = %', sql;
+  EXECUTE sql;
+  DROP TABLE _test_factory_temp_data;
+END
+$body$;
 
 CREATE OR REPLACE FUNCTION tf.get(
+  r anyelement
+  , set_name text
+) RETURNS SETOF anyelement LANGUAGE plpgsql AS $body$
+DECLARE
+  c_table_name CONSTANT text := pg_typeof(r);
+  c_data_table_name CONSTANT name := _tf.data_table_name( c_table_name, set_name );
+BEGIN
+  RETURN QUERY SELECT * FROM _tf.get(r, set_name);
+EXCEPTION
+  WHEN undefined_table THEN
+    DECLARE
+      create_sql text;
+    BEGIN
+      -- TODO: Create temp table with caller security then create permanent table as test_factory__owner
+      SELECT format(
+            $$
+CREATE TEMP TABLE %I ON COMMIT DROP AS
+WITH i AS (
+      %s
+    )
+  SELECT *
+    FROM i
+$$
+            , c_data_table_name
+            , factory.insert_sql
+          )
+        INTO create_sql
+        FROM _tf.test_factory__get( c_table_name, set_name ) factory
+      ;
+      RAISE DEBUG 'sql = %', create_sql;
+      EXECUTE create_sql;
+      PERFORM _tf.table_create( c_data_table_name );
+
+      RETURN QUERY SELECT * FROM _tf.get(r, set_name);
+    END;
+END
+$body$;
+
+CREATE OR REPLACE FUNCTION _tf.get(
   r anyelement
   , set_name text
 ) RETURNS SETOF anyelement SECURITY DEFINER LANGUAGE plpgsql AS $body$
@@ -181,33 +227,6 @@ BEGIN
   RAISE DEBUG 'sql = %', sql;
 
   RETURN QUERY EXECUTE sql;
-EXCEPTION
-  WHEN undefined_table THEN
-    DECLARE
-      create_sql text;
-    BEGIN
-      -- TODO: Create temp table with caller security then create permanent table as test_factory__owner
-      SELECT format(
-            $$
-CREATE TABLE %I.%I AS
-WITH i AS (
-      %s
-    )
-  SELECT *
-    FROM i
-$$
-            , c_td_schema
-            , c_data_table_name
-            , factory.insert_sql
-          )
-        INTO create_sql
-        FROM _tf.test_factory__get( c_table_name, set_name ) factory
-      ;
-
-      RAISE DEBUG 'sql = %', sql;
-      EXECUTE create_sql;
-      RETURN QUERY EXECUTE sql;
-    END;
 END
 $body$;
 
