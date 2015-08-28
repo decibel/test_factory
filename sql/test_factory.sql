@@ -166,7 +166,6 @@ BEGIN
   sql := format(
     $sql$
 CREATE TABLE %I.%I AS SELECT * FROM pg_temp.%2$I;
-DROP TABLE pg_temp.%2$I;
     $sql$
     , c_td_schema
     , table_name
@@ -184,7 +183,8 @@ DECLARE
   c_table_name CONSTANT text := pg_typeof(r);
   c_data_table_name CONSTANT name := _tf.data_table_name( c_table_name, set_name );
 BEGIN
-  RETURN QUERY SELECT * FROM _tf.get(r, set_name);
+  -- SEE BELOW AS WELL
+  RETURN QUERY SELECT * FROM _tf.get(r, set_name, c_data_table_name);
 EXCEPTION
   WHEN undefined_table THEN
     DECLARE
@@ -199,6 +199,8 @@ WITH i AS (
     )
   SELECT *
     FROM i
+;
+GRANT SELECT ON pg_temp.%1$I TO test_factory__owner;
 $$
             , c_data_table_name
             , factory.insert_sql
@@ -210,7 +212,11 @@ $$
       EXECUTE create_sql;
       PERFORM _tf.table_create( c_data_table_name );
 
-      RETURN QUERY SELECT * FROM _tf.get(r, set_name);
+      -- SEE ABOVE AS WELL
+      RETURN QUERY SELECT * FROM _tf.get(r, set_name, c_data_table_name);
+
+      -- Can't do this in the secdef function because it doesn't own it.
+      EXECUTE format( 'DROP TABLE pg_temp.%I', c_data_table_name );
     END;
 END
 $body$;
@@ -218,11 +224,11 @@ $body$;
 CREATE OR REPLACE FUNCTION _tf.get(
   r anyelement
   , set_name text
+  , data_table_name name
 ) RETURNS SETOF anyelement SECURITY DEFINER SET search_path = pg_catalog LANGUAGE plpgsql AS $body$
 DECLARE
   c_table_name CONSTANT text := pg_typeof(r);
   -- This sanity-checks table_name for us
-  c_data_table_name CONSTANT name := _tf.data_table_name( c_table_name, set_name );
   c_td_schema CONSTANT name := _tf.schema__getsert();
 
   sql text;
@@ -230,7 +236,7 @@ BEGIN
   sql := format(
     'SELECT * FROM %I.%I AS t'
     , c_td_schema
-    , c_data_table_name 
+    , data_table_name 
   );
   RAISE DEBUG 'sql = %', sql;
 

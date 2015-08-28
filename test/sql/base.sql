@@ -4,7 +4,10 @@
 SET ROLE = DEFAULT;
 CREATE ROLE test_role;
 GRANT USAGE ON SCHEMA tap TO test_role;
-GRANT test_role TO test_factory__owner;
+/*
+ * DO NOT GRANT test_role TO test_factory__owner; the whole point test_role is
+ * to check for security problems.
+ */
 
 CREATE SCHEMA test AUTHORIZATION test_role;
 SET ROLE = test_role;
