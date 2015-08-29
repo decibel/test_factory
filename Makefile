@@ -16,9 +16,12 @@ REGRESS_OPTS = --inputdir=test --load-language=plpgsql
 PG_CONFIG    = pg_config
 
 EXTRA_CLEAN  = $(wildcard $(EXTENSION)-*.zip) $(wildcard sql/$(EXTENSION)--$(EXTVERSION).sql)
+
+# Get Postgres version, as well as major (9.4, etc) version. Remove '.' from MAJORVER.
 VERSION 	 = $(shell $(PG_CONFIG) --version | awk '{print $$2}' | sed -e 's/devel$$//')
 MAJORVER 	 = $(shell echo $(VERSION) | cut -d . -f1,2 | tr -d .)
 
+# Function for testing a condition
 test		 = $(shell test $(1) $(2) $(3) && echo yes || echo no)
 
 GE91		 = $(call test, $(MAJORVER), -ge, 91)
