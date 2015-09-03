@@ -21,7 +21,7 @@ or
 
     pgxn load -d database_name test_factory
 
-(Run +pgxn --help+ for more info.)
+(Run pgxn --help for more info.)
 
 Hard Installation
 =================
