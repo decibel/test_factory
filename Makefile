@@ -3,7 +3,7 @@ sed -e 's/[[:space:]]*"name":[[:space:]]*"\([^"]*\)",/\1/')
 EXTVERSION = $(shell grep -m 1 '"version":' META.json | \
 sed -e 's/[[:space:]]*"version":[[:space:]]*"\([^"]*\)",\{0,1\}/\1/')
 
-DATA         = $(filter-out $(wildcard sql/*--*.sql),$(wildcard sql/*.sql))
+DATA         = $(filter-out $(wildcard sql/*-*-*.sql),$(wildcard sql/*.sql))
 DOCS         = $(wildcard doc/*.asc)
 TESTS        = $(wildcard test/sql/*.sql)
 REGRESS      = $(patsubst test/sql/%.sql,%,$(TESTS))
@@ -15,7 +15,7 @@ REGRESS_OPTS = --inputdir=test --load-language=plpgsql
 #MODULES      = $(patsubst %.c,%,$(wildcard src/*.c))
 PG_CONFIG    = pg_config
 
-EXTRA_CLEAN  = $(wildcard $(EXTENSION)-*.zip) $(wildcard sql/$(EXTENSION)--$(EXTVERSION).sql)
+EXTRA_CLEAN  = $(wildcard $(EXTENSION)-*.zip) $(wildcard sql/$(EXTENSION)--*.sql)
 
 # Get Postgres version, as well as major (9.4, etc) version. Remove '.' from MAJORVER.
 VERSION 	 = $(shell $(PG_CONFIG) --version | awk '{print $$2}' | sed -e 's/devel$$//')
