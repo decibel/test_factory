@@ -52,7 +52,7 @@ SELECT pg_catalog.pg_extension_config_dump('_tf._test_factory_factory_id_seq', '
 
 
 CREATE OR REPLACE FUNCTION _tf.data_table_name(
-  table_name text
+  table_name text -- Sanitized by tf.test_factory__get()
   , set_name _tf._test_factory.set_name%TYPE
 ) RETURNS name LANGUAGE plpgsql AS $body$
 DECLARE
@@ -90,7 +90,7 @@ $body$;
 
 
 CREATE OR REPLACE FUNCTION _tf.test_factory__get(
-  table_name text
+  table_name text -- Sanitized by tf.test_factory__get()
   , set_name _tf._test_factory.set_name%TYPE
   , table_oid oid -- Must be passed in because of forced search_path
 ) RETURNS _tf._test_factory SECURITY DEFINER SET search_path = pg_catalog LANGUAGE plpgsql AS $body$
@@ -180,15 +180,15 @@ END
 $body$;
 
 CREATE OR REPLACE FUNCTION tf.get(
-  r anyelement
+  table_type anyelement
   , set_name text
 ) RETURNS SETOF anyelement LANGUAGE plpgsql AS $body$
 DECLARE
-  c_table_name CONSTANT text := pg_typeof(r);
+  c_table_name CONSTANT text := pg_typeof(table_type);
   c_data_table_name CONSTANT name := _tf.data_table_name( c_table_name, set_name );
 BEGIN
   -- SEE BELOW AS WELL
-  RETURN QUERY SELECT * FROM _tf.get(r, set_name, c_data_table_name);
+  RETURN QUERY SELECT * FROM _tf.get(table_type, set_name, c_data_table_name);
 EXCEPTION
   WHEN undefined_table THEN
     DECLARE
@@ -217,7 +217,7 @@ $$
       PERFORM _tf.table_create( c_data_table_name );
 
       -- SEE ABOVE AS WELL
-      RETURN QUERY SELECT * FROM _tf.get(r, set_name, c_data_table_name);
+      RETURN QUERY SELECT * FROM _tf.get(table_type, set_name, c_data_table_name);
 
       -- Can't do this in the secdef function because it doesn't own it.
       EXECUTE format( 'DROP TABLE pg_temp.%I', c_data_table_name );
@@ -226,13 +226,12 @@ END
 $body$;
 
 CREATE OR REPLACE FUNCTION _tf.get(
-  r anyelement
+  table_type anyelement -- Sanitized by tf.test_factory__get()
   , set_name text
   , data_table_name name
 ) RETURNS SETOF anyelement SECURITY DEFINER SET search_path = pg_catalog LANGUAGE plpgsql AS $body$
 DECLARE
-  c_table_name CONSTANT text := pg_typeof(r);
-  -- This sanity-checks table_name for us
+  c_table_name CONSTANT text := pg_typeof(table_type);
   c_td_schema CONSTANT name := _tf.schema__getsert();
 
   sql text;
