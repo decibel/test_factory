@@ -3,6 +3,15 @@ test_factory
 
 A system for managing unit test data.
 
+Current Status
+==============
+You can see the current status of *released* versions of this extension on [PGXN-tester](http://pgxn-tester.org/distributions/test_factory).
+
+Travis-CI status: [![Build Status](https://travis-ci.org/BlueTreble/test_factory.png)](https://travis-ci.org/BlueTreble/test_factory)
+
+Installation
+============
+
 To build it, just do this:
 
     make
