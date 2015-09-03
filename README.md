@@ -1,7 +1,9 @@
 test_factory
 ===============
 
-A system for managing unit test data.
+A system for managing unit test data in Postgres.
+
+Documentation for the most recent version is on [PGXN](http://pgxn.org/dist/test_factory/doc/test_factory.html).
 
 Current Status
 ==============
@@ -9,8 +11,20 @@ You can see the current status of *released* versions of this extension on [PGXN
 
 Travis-CI status: [![Build Status](https://travis-ci.org/BlueTreble/test_factory.png)](https://travis-ci.org/BlueTreble/test_factory)
 
-Installation
-============
+Easy Installation
+=================
+Install [pgxn-client](http://pgxnclient.projects.pgfoundry.org/install.html), then do:
+
+    pgxn install test_factory
+
+or
+
+    pgxn load -d database_name test_factory
+
+(Run +pgxn --help+ for more info.)
+
+Hard Installation
+=================
 
 To build it, just do this:
 
