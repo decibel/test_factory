@@ -1,7 +1,7 @@
 test_factory
 ===============
 
-A template language that is based on format() but allows for named parameters
+A system for managing unit test data.
 
 To build it, just do this:
 
