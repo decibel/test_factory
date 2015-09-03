@@ -9,7 +9,7 @@
         "test_factory": {
             "abstract": "Framework for managing test data",
             "file": "sql/test_factory.sql",
-            "docfile": "doc/test_factory.md",
+            "docfile": "doc/test_factory.asc",
             "version": "0.3.0"
         }
     },
