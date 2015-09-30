@@ -257,4 +257,6 @@ BEGIN
 END
 $body$;
 
+DROP TABLE pg_temp.original_role;
+
 -- vi: expandtab ts=2 sw=2

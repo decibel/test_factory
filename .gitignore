@@ -6,11 +6,10 @@
 *.o
 .deps/
 
-# dist output
-/test_factory-*.zip
-
 /sql/test_factory--*
 !/sql/test_factory--*--*.sql
+/sql/test_factory_pgtap--*
+!/sql/test_factory_pgtap--*--*.sql
 
 # Test artifacts
 results/
