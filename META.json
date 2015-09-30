@@ -6,7 +6,7 @@
     "maintainer": "Jim Nasby <Jim.Nasby@BlueTreble.com>",
     "license": {"BSD 2 Clause": "http://opensource.org/licenses/bsd-license.php"},
 
-    "X_comment": "DO NOT CHANGE THE ORDER OF THE PROVIDES!"
+    "X_comment": "DO NOT CHANGE THE ORDER OF THE PROVIDES!",
     "provides": {
         "test_factory": {
             "abstract": "Framework for managing test data",
