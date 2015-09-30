@@ -15,7 +15,7 @@
             "version": "0.3.1"
         },
         "test_factory_pgtap": {
-            "abstract": "pgTap extension for test_factory"
+            "abstract": "pgTap extension for test_factory",
             "file": "sql/test_factory_pgtap.sql",
             "docfile": "doc/test_factory.asc",
             "version": "0.1.0"
