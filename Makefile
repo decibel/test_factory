@@ -1,8 +1,4 @@
-include pgxntool/variables.mk
-
-include $(PGXS)
-
-include pgxntool/targets.mk
+include pgxntool/base.mk
 
 # Hook for test to ensure dependencies in control file are set correctly
 testdeps: check_control
