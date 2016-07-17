@@ -2,7 +2,7 @@
     "name": "test_factory",
     "abstract": "Framework for managing test data",
     "description": "Provides functions for registering commands to create test data and obtaining data during testing",
-    "version": "0.4.0",
+    "version": "0.4.1",
     "maintainer": "Jim Nasby <Jim.Nasby@BlueTreble.com>",
     "license": {"BSD 2 Clause": "http://opensource.org/licenses/bsd-license.php"},
 
