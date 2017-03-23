@@ -5,7 +5,7 @@
     "name": "test_factory",
     "abstract": "Framework for managing test data",
     "description": "Provides functions for registering commands to create test data and obtaining data during testing",
-    "version": "0.4.2",
+    "version": "0.5.0",
     "maintainer": "Jim Nasby <Jim.Nasby@BlueTreble.com>",
     "license": {"BSD 2 Clause": "http://opensource.org/licenses/bsd-license.php"},
 
@@ -15,7 +15,7 @@
             "abstract": "Framework for managing test data",
             "file": "sql/test_factory.sql",
             "docfile": "doc/test_factory.asc",
-            "version": "0.3.1"
+            "version": "0.5.0"
         },
         "test_factory_pgtap": {
             "abstract": "pgTap extension for test_factory",
