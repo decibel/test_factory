@@ -1,7 +1,4 @@
 {
-    "X_WARNING": "AUTO-GENERATED FILE, DO NOT MODIFY!",
-    "X_WARNING": "Generated from META.in.json by pgxntool/build_meta.sh",
-
     "name": "test_factory",
     "abstract": "Framework for managing test data",
     "description": "Provides functions for registering commands to create test data and obtaining data during testing",
