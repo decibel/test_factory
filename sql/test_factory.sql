@@ -1,4 +1,5 @@
 CREATE TEMP TABLE original_role ON COMMIT DROP AS SELECT current_user AS original_role;
+
 GRANT SELECT ON pg_temp.original_role TO public;
 DO $body$
 BEGIN
