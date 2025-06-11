@@ -5,11 +5,8 @@ A system for managing unit test data in Postgres.
 
 Documentation for the most recent version is on [PGXN](http://pgxn.org/dist/test_factory/doc/test_factory.html).
 
-Current Status
-==============
-You can see the current status of *released* versions of this extension on [PGXN-tester](http://pgxn-tester.org/distributions/test_factory).
-
-Travis-CI status: [![Build Status](https://travis-ci.org/BlueTreble/test_factory.png)](https://travis-ci.org/BlueTreble/test_factory)
+[![PGXN version](https://badge.fury.io/pg/test_factory.svg)](https://badge.fury.io/pg/test_factory)
+[![🐘 Postgres](https://github.com/decibel/test_factory/actions/workflows/ci.yml/badge.svg)](https://github.com/decibel/test_factory/actions/workflows/ci.yml)
 
 Easy Installation
 =================
